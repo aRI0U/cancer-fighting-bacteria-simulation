@@ -1,0 +1,139 @@
+\documentclass[a4paper]{article}
+
+%% Language and font encodings
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+
+%% Sets page size and margins
+\usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+%% Useful packages
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+
+\usepackage{amsthm}
+\usepackage {stmaryrd}
+
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{language=sql,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+\usepackage{tikz}
+\usetikzlibrary{automata,positioning}
+
+\theoremstyle{definition}
+\newtheorem{Ex}{Exercice}
+
+\title{Initiation to Research}
+\author{Ardoin, Lichtle, Riou}
+
+\begin{document}
+\maketitle
+
+\section{A mathematical model to understand local dispersion of AHL}
+
+In this part, our goal is to determine the spatial equations that rule the behaviour of bacteria and the interactions between them via AHL and quorum sensing.
+
+\subsection{Presentation}
+
+First, we consider that the experience takes place in a bounded metric space $E$.
+
+In this space, some bacteria evolve. A \emph{bacterium} is considered as a material point in space $E$, and we denote $p_n(t)$ the position of bacterium $n$ at time $t$.
+
+Moreover, bacteria produce a plasmid LuxI (denoted $I$) and a lysis protein (denoted $L$). At any time $t$, we denote $I_n(t)$ (resp. $L_n(t)$) the intracellular concentration of LuxI (resp. lysis protein) of bacterium $n$. Bacteria also produces AHL at regular intervals. We denote $H : E \times \mathbb{R}_+ \to \mathbb{R}_+$ the function of AHL density, such that $H(M,t)$ represents the density of AHL on position $M$ at time $t$.
+
+Finally, bacteria are able to do two important actions: \emph{reproduce} themselves and \emph{self-destruct}. Therefore, the set of bacteria is not constant, thus we denote $N_t$ the set of all bacteria which exists in space $E$ at time $t$.
+
+\subsection{Modelling}
+
+\subsubsection{Moves of bacteria and AHL particles}
+
+We consider that bacteria move following a brownian movement. In terms of visualization, we thus represent them as spheres of constant radius which move randomly. When any bacterium touches a border of the space, it simply follows the same move but in the symmetric direction. For example, if some bacterium touches a vertical bound while its speed is a vector $(\vec{v}_x, \vec{v}_y)$, its new speed will be $(-\vec{v}_x, \vec{v}_y)$.
+
+TODO collisions cells
+
+We suppose that AHL molecules are very small in comparison with bacteria, therefore we represent these molecules by a function of density defined on all the space $E$. This density depends on the ponctual production of AHL by bacteria, but also evolves temporaly because of the propagation of these molecules in the fluid in which they are produced.
+
+We represent this propagation using convolutions, such that at any time $t$ :
+\begin{equation}
+\frac{dH}{dt}(x,y,z,t) = (H * g)(x,y,z,t) := \iiint \limits_E H(x-u,y-v,z-w,t)g(u,v,w) du dv dw
+\end{equation}
+where $g$ is a filter defined on $E$.
+
+Using convolutions to represent a propagation of our signal is inspired from classical algorithms of image processing. Intuitively, the idea is to choose a well defined filter $g$ such that the convolution operation "blurs" the density of AHL, which corresponds to the phenomenon of density homogeneization over time.
+
+
+In practice, for computation considerations, the space will be discretized, such that the integrals will become discrete sums, and that the filter $g$ will be represented as a matrix.
+
+
+
+\subsubsection{Updates of bacteria}
+
+We consider that cells have an internal clock, and that they "update" themselves every $\Delta t$. At every update, each bacterium $n$ does the following actions:
+\begin{itemize}
+
+\item \textbf{Self-destruction:} The self-destruction of a cell is more likely to happen when the intracellular concentration of lysis protein is high. We first define the cell degradation function $\gamma_n$:
+$$\gamma_n(t) := \frac{kL_n^2(t)}{L_{n,0}^2 + L_n^2(t)}$$
+where $k$ is the maximum rate of cell lysis and $L_{n,0}$ is the concentration of lysis gene resulting in half maximum lysis.
+
+With a probability $\mu_D := \min(\gamma_n(t), 1)$, bacterium $n$ self-destructs.
+
+
+\item \textbf{Reproduction:} With a probability $\mu_G$, the bacterium divides itself into two identical bacteria $n_1$ and $n_2$. The concentration of lysis protein and LuxI are equally shared by the two new bacteria :
+\begin{equation}
+L_{n_1}(t+\Delta t) =  L_{n_2}(t+\Delta t) = \frac{L_n(t)}{2}
+\end{equation}
+\begin{equation}
+I_{n_1}(t+\Delta t) =  I_{n_2}(t+\Delta t) = \frac{I_n(t)}{2}
+\end{equation}
+
+
+\item \textbf{AHL production:} At each step, bacteria produce a certain quantity of AHL, proportionnally to the intracellular concentration of LuxI. Mathematically, it can be formalized by the partial derivative equation :
+$$H(p_n(t+\Delta_t), t+\Delta t) = H(p_n(t+\Delta t),t) +  bI_n(t)$$
+
+\item \textbf{Update of $L$ and $I$:} Like we saw in previous part, the concentration of lysis protein is directly linked to AHL concentration around the cell.
+
+We consider that the quantity $H_n(t)$ of AHL that can be detected by a bacterium $n$ at time $t$ is :
+$$H_n(t) := \iiint \limits_{x \in B(p_n(t), \rho)} H(x, t)$$
+where $\rho$ is the maximum distance of AHL detection for a bacterium and $B(x, \rho)$ denotes the ball of center $x \in E$ and radius $\rho$.
+
+The activation term $P_n$ is thus defined by :
+$$P_n(t) := \alpha_0 + \frac{\alpha_H(H_n(t)/H_0)^4}{1 + (H_n(t)/H_0)^4}$$
+where $\alpha_0$ is the Lux promoter basal detection, $\alpha_H$ is the Lux promoter AHL induced detection and $H_0$ is the AHL binding affinity to Lux promoter.
+
+$L_n$ and $I_n$ then satisfy the following differential equations :
+\begin{equation}
+\frac{d L_n}{d t} = C_L P_n - \gamma_L L
+\end{equation}
+\begin{equation}
+\frac{d I_n}{d t} = C_I P_n - \gamma_I I
+\end{equation}
+\end{itemize}
+
+
+
+
+\end{document}
