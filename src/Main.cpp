@@ -49,8 +49,8 @@ int main() {
       clock.restart();
 
       b.update(DT);
-      b.drawAHL(window);
       b.drawBacteria(window);
+      b.drawAHL(window);
 
       window.display();
     }

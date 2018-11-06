@@ -12,7 +12,7 @@ const sf::Color WINDOW_BACKGROUND_COLOR = sf::Color(210,210,210);
 
 const int CONTAINER_RADIUS = 700.0 * _FACTOR;
 const sf::Color CONTAINER_BORDER_COLOR = sf::Color(150,150,150);
-const sf::Color CONTAINER_COLOR = sf::Color(200,200,200);
+const sf::Color CONTAINER_COLOR = sf::Color(50,50,50);
 
 const int BACTERIA_RADIUS = 10.0 * _FACTOR;
 const sf::Color BACTERIA_COLOR = sf::Color(100, 100, 200, 200);

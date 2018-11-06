@@ -16,6 +16,16 @@ void BacteriaManager::new_bacteria(sf::Vector2f pos) {
 void BacteriaManager::update(float dt) {
   std::cout << bacteria.size() << " bacteria\n";
 
+  std::vector<std::vector<float>> AHL_tmp = AHL;
+  for (int i = 1; i < WINDOW_HEIGHT - 1; i++)
+    for (int j = 1; j < WINDOW_WIDTH - 1; j++) {
+      AHL[i][j] = 0;
+      for (int di = -1; di <= 1; di++)
+        for (int dj = -1; dj <= 1; dj++)
+          AHL[i][j] += AHL_tmp[i+di][j+dj];
+      AHL[i][j] /= 9;
+    }
+
   std::vector<Bacteria> new_bacteria;
 
   for (auto &b: bacteria) {
@@ -61,8 +71,9 @@ void BacteriaManager::drawAHL(sf::RenderTarget &target) {
     for (int j = 0; j < WINDOW_WIDTH; j++) {
       int i2 = i - WINDOW_HEIGHT/2, j2 = j - WINDOW_WIDTH/2;
       if (AHL[i][j] > 0 && sqrt((float)(i2*i2 + j2*j2)) < CONTAINER_RADIUS) {
-        float x = AHL[i][j] * 200.0 / 500.0;
-        sf::Color ahl_color(x, 0, 0);
+        float x = AHL[i][j];// * 200.0 / 500.0;
+        if (x * 30 > 200) x = 200/30;
+        sf::Color ahl_color(50 + x*30, 50, 50, 100);
         // sf::Color ahl_color(200, 200 - x, 200 - x, 200);
         sf::Vertex v(sf::Vector2f(j, i), ahl_color);
         points.push_back(v);
