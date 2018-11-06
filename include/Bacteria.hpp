@@ -3,14 +3,21 @@
 #include "BacteriaManager.hpp"
 #include "consts.hpp"
 
+#include <math.h>
+#include <iostream>
 
 class Bacteria {
+
 public:
-  Bacteria(int x, int y, BacteriaManager *manager);
-  Bacteria(sf::Vector2f pos, BacteriaManager *manager);
+  Bacteria(int x, int y);
+  Bacteria(sf::Vector2f pos);
   void draw(sf::RenderTarget& target) const;
-  void update(float dt);
-  void split();
+  bool update(float dt);
+  sf::Vector2f get_pos();
+  float get_I();
+  float get_L();
+  void set_I(float I);
+  void set_L(float L);
 
 private:
   sf::CircleShape shape;
@@ -18,8 +25,7 @@ private:
   sf::Vector2f pos;
   sf::Vector2f speed;
 
-  BacteriaManager *manager;
+  float I_value; // LuxI
+  float L_value; // Lysis
 
-  float time_since_split;
-  float split_delay;
 };

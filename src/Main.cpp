@@ -16,15 +16,23 @@
 
 int main() {
   srand(time(NULL));
-  sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Replicating Bacteria to Destroy Cancer Cells");
 
-  constexpr float MAX_FPS = 60;
-  const float time_between_frames = 1.0 / MAX_FPS;
+  sf::ContextSettings settings;
+  settings.antialiasingLevel = 32;
+  sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Replicating Bacteria to Destroy Cancer Cells");
 
   sf::Clock clock;
 
   BacteriaManager b;
-  b.new_bacteria(sf::Vector2f(WINDOW_WIDTH/2, WINDOW_HEIGHT/2));
+  for (int i = 0; i < 100; i++)
+    b.new_bacteria(sf::Vector2f(0, 0)); // (0,0) is center of window
+
+  sf::CircleShape container(CONTAINER_RADIUS, 10000);
+  container.setOrigin(CONTAINER_RADIUS, CONTAINER_RADIUS);
+  container.setPosition(WINDOW_WIDTH/2, WINDOW_HEIGHT/2);
+  container.setFillColor(CONTAINER_COLOR);
+  container.setOutlineColor(CONTAINER_BORDER_COLOR);
+  container.setOutlineThickness(2);
 
   while (window.isOpen()) {
 
@@ -34,11 +42,14 @@ int main() {
         window.close();
     }
 
-    if (clock.getElapsedTime().asSeconds() >= time_between_frames) {
+    if (clock.getElapsedTime().asSeconds() >= DT) {
+      std::cout << 1.0 / clock.getElapsedTime().asSeconds() << " FPS (limit: " << 1.0 / DT << ")\n";
       window.clear(WINDOW_BACKGROUND_COLOR);
-      sf::Time elapsed = clock.restart();
+      window.draw(container);
+      clock.restart();
 
-      b.update(elapsed.asSeconds());
+      b.update(DT);
+      b.drawAHL(window);
       b.drawBacteria(window);
 
       window.display();
