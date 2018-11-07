@@ -83,8 +83,7 @@ We represent this propagation using convolutions, such that at any time $t$ :
 \end{equation}
 where $g$ is a filter defined on $E$.
 
-Using convolutions to represent a propagation of our signal is inspired from classical algorithms of image processing. Intuitively, the idea is to choose a well defined filter $g$ such that the convolution operation "blurs" the density of AHL, which corresponds to the phenomenon of density homogeneization over time.
-
+Using convolutions to represent a propagation of our signal is inspired from classical algorithms of image processing. Intuitively, the idea is to choose a well defined filter $g$ such that the convolution operation "blurs" the density of AHL, which corresponds to the phenomenon of density homogenization over time.
 
 In practice, for computation considerations, the space will be discretized, such that the integrals will become discrete sums, and that the filter $g$ will be represented as a matrix.
 
@@ -133,6 +132,14 @@ $L_n$ and $I_n$ then satisfy the following differential equations :
 \end{equation}
 \end{itemize}
 
+\subsection{Implementation}
+
+In practice, our simulation is realized on a discretized space, and quantity evolve by successive cycles of time $\Delta t$. In order to limit the complexity of the simulation, we also consider that all bacteria have the same internal clock, thus all cells update at the same time.
+
+Our space $E$ is totally discrete, so the function $H$ is represented by a big matrix, in which each coefficient represents the concentration of AHL in an elementary volume of space.
+
+Moreover, the derivative equations are also discrete, such that for all function $f$, we make the following approximation :
+$$\frac{df}{dt} = \frac{f(t+\Delta t) - f(t)}{\Delta t}$$
 
 
 
