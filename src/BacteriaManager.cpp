@@ -14,7 +14,8 @@ void BacteriaManager::new_bacteria(sf::Vector2f pos) {
 }
 
 void BacteriaManager::update(float dt) {
-  std::cout << bacteria.size() << " bacteria\n";
+  int nb_split = 0;
+  int nb_death = 0;
 
   std::vector<std::vector<float>> AHL_tmp = AHL;
   for (int i = 1; i < WINDOW_HEIGHT - 1; i++)
@@ -51,13 +52,17 @@ void BacteriaManager::update(float dt) {
         b.set_L(b.get_L() / 2);
         new_bacteria.push_back(b);
         new_bacteria.push_back(b);
+        nb_split++;
       }
       else
         new_bacteria.push_back(b);
     }
+    else
+      nb_death++;
   }
 
   bacteria = new_bacteria;
+  std::cout << bacteria.size() << " bacteria | " << nb_split << " splits | " << nb_death << " deaths\n";
 }
 
 void BacteriaManager::drawBacteria(sf::RenderTarget &target) {
