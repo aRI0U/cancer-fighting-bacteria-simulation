@@ -47,17 +47,33 @@
 \theoremstyle{definition}
 \newtheorem{Ex}{Exercice}
 
-\title{Initiation to Research}
+\title{Spatial modelization of AHL dispersion in a bounded space}
 \author{Ardoin, Lichtle, Riou}
 
 \begin{document}
 \maketitle
 
-\section{A mathematical model to understand local dispersion of AHL}
+\section*{Introduction}
 
-In this part, our goal is to determine the spatial equations that rule the behaviour of bacteria and the interactions between them via AHL and quorum sensing.
+In this small paper, our aim is to determine the behaviour of bacteria whiwh use quorum sensing to communicate. In particular, we will interest on bacteria which produce N-Acyl homoserine lactone (abbreviated AHL), a signaling molecule whose concentration influences the probability for bacteria to self-destruct. The dispersion of this molecule thus enables bacteria to have a synchronized behaviour, which can have several applications, for instance in medicine.
 
-\subsection{Presentation}
+This paper is mainly inspired by a 2016 paper from Din \textit{et al.} called "Synchronized cycles of bacterial lysis for \textit{in vivo} delivery" which notably proposes a simulation for the behaviour of bacteria using AHL molecules, but without any spatial aspect, considering the density of AHL is uniform in the space.
+
+Thus we added spatial considerations to the existing model, and implemented this more precise simulation, using C++ SFML library in order to visualize the evolution of bacteria population and AHL density.
+
+The complete code of our simulation can be found at the following URL:\\ \texttt{https://github.com/nathanlct/cancer-fighting-bacteria-simulation}
+
+\section{The initial approach: an ideal simulation}
+
+In the paper we base our work on, the simulation was taking place in a cell trap where everything was perfectly mixed, such that the AHL density is uniform. In this way, there is just a general simulation of every concentration to calculate. A periodic pattern appears clearly with such a model.
+
+\begin{figure}[!h]
+        \centering
+        \includegraphics[width=1\textwidth]{Figure_2.png}
+        \caption{Plot of the ideal simulation}
+\end{figure}
+
+\section{Presentation}
 
 First, we consider that the experience takes place in a bounded metric space $E$.
 
@@ -67,9 +83,9 @@ Moreover, bacteria produce a plasmid LuxI (denoted $I$) and a lysis protein (den
 
 Finally, bacteria are able to do two important actions: \emph{reproduce} themselves and \emph{self-destruct}. Therefore, the set of bacteria is not constant, thus we denote $N_t$ the set of all bacteria which exists in space $E$ at time $t$.
 
-\subsection{Modelling}
+\section{Modelling}
 
-\subsubsection{Moves of bacteria and AHL particles}
+\subsection{Moves of bacteria and AHL particles}
 
 We consider that bacteria move following a brownian movement. In terms of visualization, we thus represent them as spheres of constant radius which move randomly. When any bacterium touches a border of the space, it simply follows the same move but in the symmetric direction. For example, if some bacterium touches a vertical bound while its speed is a vector $(\vec{v}_x, \vec{v}_y)$, its new speed will be $(-\vec{v}_x, \vec{v}_y)$.
 
@@ -89,7 +105,7 @@ In practice, for computation considerations, the space will be discretized, such
 
 
 
-\subsubsection{Updates of bacteria}
+\subsection{Updates of bacteria}
 
 We consider that cells have an internal clock, and that they "update" themselves every $\Delta t$. At every update, each bacterium $n$ does the following actions:
 \begin{itemize}
@@ -132,7 +148,7 @@ $L_n$ and $I_n$ then satisfy the following differential equations :
 \end{equation}
 \end{itemize}
 
-\subsection{Implementation}
+\section{Implementation}
 
 In practice, our simulation is realized on a discretized space, and quantity evolve by successive cycles of time $\Delta t$. In order to limit the complexity of the simulation, we also consider that all bacteria have the same internal clock, thus all cells update at the same time.
 
@@ -141,6 +157,63 @@ Our space $E$ is totally discrete, so the function $H$ is represented by a big m
 Moreover, the derivative equations are also discrete, such that for all function $f$, we make the following approximation :
 $$\frac{df}{dt} = \frac{f(t+\Delta t) - f(t)}{\Delta t}$$
 
+Thus the differential equations become discrete and can be computed effectively :
+\begin{equation}
+L_n(t+\Delta t) = \Delta t((1-\gamma_L)L_n(t) + C_L P_n(t))
+\end{equation}
+\begin{equation}
+I_n(t+\Delta t) = \Delta t((1-\gamma_I)I_n(t) + C_I P_n(t))
+\end{equation}
+for every bacteria.
 
+\subsection*{Constants}
+
+All the numerical values of the constants which appear in the different equations are those of our main inspiration paper:
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{c|c|c}
+Complete name & Abbreviation & Numerical value \\
+\hline
+Dilution due to cell growth & $\mu_G$ & 0.02 \\
+Maximum rate of cell lysis & $k$ & 10 \\
+Concentration of lysis gene in half maximum lysis & $L_0$ & 2 \\
+AHL production rate & $b$ & 25 \\
+Lux promoter basal production & $\alpha_0$ & 0.5 \\
+Lux promoter AHL induced production & $\alpha_H$ & 35 \\
+AHL binding affinity to Lux promoter & $H_0$ & 5 \\
+Lysis gene copy number & $C_L$ & 0.5 \\
+LuxI copy number & $C_I$ & 1 \\
+Basal degradation of lysis protein & $\gamma_L$ & 2 \\
+Basal degradation of LuxI & $\gamma_I$ & 2 \\
+\end{tabular}
+\caption{Numeric values of biological constants}
+\end{table}
+
+\newpage
+
+\section*{Results and conclusion}
+
+The main difference between the ideal simulation is that the behaviour of bacteria is periodic in ideal one whereas there is an exponential growth in our model. The number of deaths compared to the total population of bacteria is very small, but we noticed that the rate between the number of splits and number of deaths seems to converge to a number a little greater that 1. Therefore, with this model, the number of self-destructions increases indefinitely.
+
+Moreover, the density of bacteria is really concentrated in the center of the space, where bacteria appear first, so we suppose that the volume of the space $E$ does not influence really the results while it stays "reasonable".
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=1\textwidth]{Figure_3.png}
+\caption{Evolution of total population}
+\end{figure}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=1\textwidth]{Figure_1.png}
+\caption{Evolution of the number of deaths and splits per unity of time}
+\end{figure}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=1\textwidth]{Figure_4.png}
+\caption{Evolution of the rate splits/deaths per unity of time}
+\end{figure}
 
 \end{document}
